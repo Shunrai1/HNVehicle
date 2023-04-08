@@ -1,0 +1,32 @@
+server:
+  port: 8000
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/HNVehicle
+    username: postgres
+    password: 2823124008
+    driver-class-name: org.postgresql.Driver
+
+
+#mybatis:
+#  mapper-locations: classpath:mapper/*.xml
+#  configuration:  # 指定mybatis全局配置文件中的相关配置项
+#    map-underscore-to-camel-case: true
+#  type-aliases-package: com.example.hnvehicle.bean
+#mybatis:
+#  config-location: classpath:mybatis/mybatis-config.xml
+#  mapper-locations: classpath:mybatis/mapper/*.xml
+mybatis-plus:
+  type-aliases-package: com.example.hnvehicle.bean
+  mapper-locations: classpath:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+#打开mybatisplus的sql语句显示
+logging:
+  level:
+    com:
+      baomidou:
+        mybatisplus:
+          mapper=DEBUG:

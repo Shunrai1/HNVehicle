@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.hnvehicle.mapper.SharedEBikeMapper">
+    <!--
+      mapper接口和映射文件要保证两个一致
+      1.mapper接口全类名和映射文件的namespace一致
+      2.mapper接口中的方法的方法名要和映射文件中的sql的id一致
+      -->
+<!--    void addSharedEBike(SharedEBike sharedEBike);-->
+    <insert id="addSharedEBike" parameterType="sharedEBike">
+        insert into public."SharedEBike" (no,state,cumlative_usage_time,monthly_usage_times,trail,color,battery,lng,lat) values
+                                (#{no},#{state},#{cumlativeUsageTime},#{monthlyUsageTimes},#{trail},#{color},#{battery},#{lng},#{lat})
+    </insert>
+</mapper>
