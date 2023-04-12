@@ -1,5 +1,7 @@
 package com.example.hnvehicle;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.example.hnvehicle.bean.PersonalEBike;
 import com.example.hnvehicle.bean.SharedBike;
 import com.example.hnvehicle.bean.SharedEBike;
@@ -26,6 +28,9 @@ class HnVehicleApplicationTests {
     SharedEBikeService sharedEBikeService;
     @Autowired
     SharedBikeService sharedBikeService;
+    final String state1="维修中";
+    final String state2="正在使用中";
+    final String state3="停车中";
 
     @Test
     void contextLoads() {
@@ -96,4 +101,113 @@ class HnVehicleApplicationTests {
         }
     }
 
+    @Test
+    void selectAllTest02(){
+        QueryWrapper<SharedEBike> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("state", "正在使用中").or().eq("state","停车中");
+        List<SharedEBike> list = sharedEBikeService.list(queryWrapper);
+        for (SharedEBike i:list
+             ) {
+            System.out.println(i);
+        }
+    }
+
+    @Test
+    void selectAllTest03(){
+        QueryWrapper<SharedBike> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("state", "正在使用中").or().eq("state","停车中");
+        List<SharedBike> list = sharedBikeService.list(queryWrapper);
+        for (SharedBike i:list
+             ) {
+            System.out.println(i);
+        }
+    }
+
+    @Test
+    void selectbadTest01(){
+        QueryWrapper<SharedEBike> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("state", "维修中");
+        List<SharedEBike> list = sharedEBikeService.list(queryWrapper);
+        for (SharedEBike i:list
+        ) {
+            System.out.println(i);
+        }
+    }
+
+    @Test
+    void selectBadTest02(){
+        QueryWrapper<SharedBike> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("state", "维修中");
+        List<SharedBike> list = sharedBikeService.list(queryWrapper);
+        for (SharedBike i:list
+        ) {
+            System.out.println(i);
+        }
+    }
+
+    /**
+     * 删除车辆
+     */
+
+    @Test
+    void deleteTest01(){
+        boolean b = personalEBikeService.removeById(500);
+        if (b){
+            System.out.println("删除成功");
+        }else {
+            System.out.println("删除失败");
+        }
+    }
+
+    @Test
+    void deleteTest02(){
+        boolean b = sharedEBikeService.removeById(300);
+        if (b){
+            System.out.println("删除成功");
+        }
+    }
+
+    @Test
+    void deleteTest03(){
+        boolean b = sharedBikeService.removeById(50);
+        if (b){
+            System.out.println("删除成功");
+        }
+    }
+
+    /**
+     * 更新车辆
+     */
+
+    @Test
+    void updateTest01(){
+        UpdateWrapper<SharedEBike> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("seb_id",301);
+
+        updateWrapper.set("state","test更新");
+        boolean b = sharedEBikeService.update(null,updateWrapper);
+
+    }
+
+    @Test
+    void updateTest02(){
+//        SharedBike sharedBike = new SharedBike();
+//        sharedBike.setSbId(51);
+////        if(!(state1.equals(state)|| state2.equals(state)|| state3.equals(state))){
+////            return "更新失败";
+////        }
+//        sharedBike.setState("更新test2");
+//        boolean b = sharedBikeService.updateById(sharedBike);
+//        if(b){
+//            System.out.println("更新成功");
+//        }
+
+        UpdateWrapper<SharedBike> updateWrapper = new UpdateWrapper<>();
+
+        updateWrapper.eq("sb_id", 51);//作为条件
+
+        updateWrapper.set("state","更新3");//设置想要更新的字段
+
+        boolean b = sharedBikeService.update(null, updateWrapper);//这里的实体类设置为空
+    }
 }

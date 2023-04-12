@@ -24,9 +24,13 @@ mybatis-plus:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 #打开mybatisplus的sql语句显示
+# 控制台输出日志
 logging:
   level:
+    root: info
     com:
       baomidou:
         mybatisplus:
           mapper=DEBUG:
+
+
