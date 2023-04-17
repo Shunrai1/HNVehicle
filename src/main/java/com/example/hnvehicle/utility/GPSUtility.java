@@ -1,14 +1,17 @@
 package com.example.hnvehicle.utility;
 
+import com.example.hnvehicle.config.InitRouteConfig;
 import com.graphhopper.GHRequest;
 import com.graphhopper.GHResponse;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.ResponsePath;
 import com.graphhopper.util.PointList;
 import com.graphhopper.util.shapes.GHPoint;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.configurationprocessor.json.JSONArray;
 import org.springframework.boot.configurationprocessor.json.JSONException;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 
@@ -19,10 +22,13 @@ import java.util.*;
  * @Description
  */
 public class GPSUtility {
+
+
     public static void main(String[] args) {
+
         GPSUtility gpsUtility = new GPSUtility();
         try {
-            gpsUtility.generateTrackData("113.35948,23.159074;113.360349,23.159562;113.361052,23.159404",30.0,10.0,5.0);
+            gpsUtility.generateTrackData("113.35948,23.159074;113.360349,23.159562;113.361052,23.159404", 30.0, 10.0, 0.0);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -39,9 +45,10 @@ public class GPSUtility {
             GHpoints.add(GHPoint.fromStringLonLat(pointsz[i]));
         }
         // 请求对象的简单配置
-        GHRequest req = new GHRequest(GHpoints).setProfile("car").setLocale(Locale.CHINA);
+        GHRequest req = new GHRequest(GHpoints).setProfile("bike").setLocale(Locale.CHINA);
         // 获取返回结果
-       GraphHopper graphHopper = new GraphHopper();
+        InitRouteConfig initRouteConfig = new InitRouteConfig();
+        GraphHopper graphHopper = initRouteConfig.initConnection();
         GHResponse rsp = graphHopper.route(req);
         // handle errors
         if (rsp.hasErrors()) {
@@ -89,19 +96,6 @@ public class GPSUtility {
     }
 
 
-//    private static void warmUpCHSubNetwork(GraphHopper graphHopper, int iterations) {
-//        GraphHopperStorage ghStorage = graphHopper.getGraphHopperStorage();
-//        Random rand = new Random(0);
-//        for (int i = 0; i < iterations; i++) {
-//            int startNode = rand.nextInt(graphHopper.getMaxVisitedNodes() + 1);
-//            int endNode = rand.nextInt(graphHopper.getMaxVisitedNodes() + 1);
-//            double fromLatitude = ghStorage.getNodeAccess().getLatitude(startNode);
-//            double fromLongitude = ghStorage.getNodeAccess().getLongitude(startNode);
-//            double toLatitude = ghStorage.getNodeAccess().getLatitude(endNode);
-//            double toLongitude = ghStorage.getNodeAccess().getLongitude(endNode);
-//            GHRequest request = new GHRequest(fromLatitude, fromLongitude, toLatitude, toLongitude);
-//            graphHopper.route(request);
-//        }
-//    }
+
 
 }
