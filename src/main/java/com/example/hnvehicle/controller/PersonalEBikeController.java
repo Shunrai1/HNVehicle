@@ -1,6 +1,8 @@
 package com.example.hnvehicle.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.hnvehicle.bean.PersonalEBike;
+import com.example.hnvehicle.bean.SharedBike;
 import com.example.hnvehicle.service.PersonalEBikeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -30,23 +32,36 @@ public class PersonalEBikeController {
      * @param timeInterval
      * @param campus
      * @param color
-     * @param lng
-     * @param lat
      * @return
      */
     @ResponseBody
     @RequestMapping("/addPersonalEBike")
     public String addPersonalEBike(@RequestParam("no")String no, @RequestParam("ownership") String ownership,
                                    @RequestParam("timeInterval")String timeInterval, @RequestParam("campus")String campus,
-                                   @RequestParam("color")String color, @RequestParam("lng")String lng, @RequestParam("lat")String lat) {
+                                   @RequestParam("color")String color) {
         PersonalEBike personalEBike = new PersonalEBike();
+        //判断no是否合法，”NH.000000” 到 ”HN.999999"之间的格式，并查询是否有重复车牌
+        QueryWrapper<PersonalEBike> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("no",no);
+        long count = personalEBikeService.count(queryWrapper);
+        int i;
+        try {
+             i = Integer.parseInt(no.substring(3));
+        } catch (NumberFormatException e) {
+            return "添加失败,no的格式错误";
+        }
+        if(!(no.length()==9&& no.startsWith("HN.")&&(i>=100000&&i<=599999))){
+            return "添加失败，no的格式错误";
+        }
+        if (count!=0){
+            return "添加失败，已经存在该车牌";
+        }
         personalEBike.setNo(no);
         personalEBike.setOwnership(ownership);
         personalEBike.setTimeInterval(timeInterval);
         personalEBike.setCampus(campus);
         personalEBike.setColor(color);
-        personalEBike.setLng(Double.parseDouble(lng));
-        personalEBike.setLat(Double.parseDouble(lat));
+
         boolean save = personalEBikeService.save(personalEBike);
         if(save){
             return "添加成功";

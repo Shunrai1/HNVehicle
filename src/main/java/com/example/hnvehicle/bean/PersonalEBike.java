@@ -23,6 +23,4 @@ public class PersonalEBike {
     private String timeInterval;
     private String campus;
     private String color;
-    private double lng;
-    private double lat;
 }

@@ -13,4 +13,9 @@
     <insert id="addPersonalEBike" parameterType="PersonalEBike">
         insert into public."PersonalEBike" (no,ownership,time_interval,campus,color,lng,lat) values (#{no},#{ownership},#{timeInterval},#{campus},#{color},#{lng},#{lat})
     </insert>
+
+<!--    Page<PersonalEBike> selectPageVo(@Param("page") Page<PersonalEBike>page, @Param("campus") String campus);-->
+    <select id="selectPageVo" resultType="personalEBike">
+
+    </select>
 </mapper>

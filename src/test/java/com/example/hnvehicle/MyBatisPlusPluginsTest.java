@@ -23,11 +23,46 @@ public class MyBatisPlusPluginsTest {
     @Resource
     PersonalEBikeMapper personalEBikeMapper;
 
+    /**
+     * 使用BaseMapper 来调用分页功能
+     */
     @Test
     public void testPage(){
 //        personalEBikeService.pageMaps();
+        //current: 当前页  size：每页多少条
         Page<PersonalEBike> personalEBikePage = new Page<>(1,10);
         Page<PersonalEBike> page = personalEBikeMapper.selectPage(personalEBikePage, null);
         System.out.println(page);
+        System.out.println(page.getRecords());//获取当前页的数据
+        System.out.println(page.getCurrent());//获取当前业码
+        System.out.println(page.getTotal());//获取总记录数
+        System.out.println(page.hasPrevious());//是否有上一页
+        System.out.println(page.hasNext());//是否有下一页
+    }
+
+    /**
+     * 自定义分页功能
+     */
+    @Test
+    public void testPageVo(){
+        Page<PersonalEBike> page = new Page<>(1,4);
+        Page<PersonalEBike> pageVo = personalEBikeMapper.selectPageVo(page, "启林北");
+
+    }
+
+    /**
+     * 使用IService 来调用page分页功能
+     */
+    @Test
+    public void testPage2(){
+        Page<PersonalEBike> personalEBikePage = new Page<>(1,10);
+        Page<PersonalEBike> page = personalEBikeService.page(personalEBikePage);
+        System.out.println(page);
+        System.out.println(page.getRecords());//获取当前页的数据
+        System.out.println(page.getCurrent());//获取当前业码
+        System.out.println(page.getPages());//总页数
+        System.out.println(page.getTotal());//获取总记录数
+        System.out.println(page.hasPrevious());//是否有上一页
+        System.out.println(page.hasNext());//是否有下一页
     }
 }

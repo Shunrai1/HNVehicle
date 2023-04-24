@@ -46,8 +46,7 @@ class HnVehicleApplicationTests {
         personalEBike.setNo("test2");
         personalEBike.setOwnership("我");
         personalEBike.setTimeInterval("2000-3453");
-        personalEBike.setLat(23.3455234);
-        personalEBike.setLng(112.35533);
+
 //        int save = personalEBikeService.addPersonalEBike(personalEBike);
         boolean save = personalEBikeService.save(personalEBike);
         if (save){
@@ -104,7 +103,7 @@ class HnVehicleApplicationTests {
     @Test
     void selectAllTest02(){
         QueryWrapper<SharedEBike> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("state", "正在使用中").or().eq("state","停车中");
+        queryWrapper.eq("state", "正在使用中");
         List<SharedEBike> list = sharedEBikeService.list(queryWrapper);
         for (SharedEBike i:list
              ) {

@@ -3,9 +3,11 @@ package com.example.hnvehicle.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.conditions.update.UpdateChainWrapper;
+import com.example.hnvehicle.bean.SharedBike;
 import com.example.hnvehicle.bean.SharedEBike;
 import com.example.hnvehicle.service.SharedEBikeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -18,12 +20,13 @@ import java.util.List;
  * @Version 1.0
  * @Description
  */
+@Controller
 public class SharedEBikeController {
     @Autowired
     SharedEBikeService sharedEBikeService;
     final String state1="维修中";
     final String state2="正在使用中";
-    final String state3="停车中";
+
 
     /**
      * 添加共享电动车
@@ -45,8 +48,25 @@ public class SharedEBikeController {
                                  @RequestParam("trail")String trail, @RequestParam("color")String color, @RequestParam("battery")String battery,
                                  @RequestParam("lng")String lng, @RequestParam("lat")String lat) {
         SharedEBike sharedEBike = new SharedEBike();
+        //判断no是否合法，”NH.000000” 到 ”HN.999999"之间的格式，并查询是否有重复车牌
+        QueryWrapper<SharedEBike> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("no",no);
+        long count = sharedEBikeService.count(queryWrapper);
+        int i;
+        try {
+            i = Integer.parseInt(no.substring(3));
+        } catch (NumberFormatException e) {
+            return "添加失败,no的格式错误";
+        }
+        if(!(no.length()==9 &&no.startsWith("HN.") &&((i>=600000&&i<=699999)||(i>=800000&&i<=899999)))){
+            return "添加失败，no的格式错误";
+        }
+        if (count!=0){
+            return "添加失败，已经存在该车牌";
+        }
         sharedEBike.setNo(no);
-        if(!(state1.equals(state)|| state2.equals(state)|| state3.equals(state))){
+        //添加的状态只能为这两种
+        if(!(state1.equals(state)|| state2.equals(state))){
             return "添加失败";
         }
         sharedEBike.setState(state);
@@ -74,7 +94,7 @@ public class SharedEBikeController {
     @RequestMapping("/getAllSharedEBike")
     public List<SharedEBike> getAllSharedEBike(){
         QueryWrapper<SharedEBike> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("state", "正在使用中").or().eq("state","停车中");
+        queryWrapper.eq("state", state2);
         List<SharedEBike> list = sharedEBikeService.list(queryWrapper);
         return list;
     }
@@ -88,7 +108,7 @@ public class SharedEBikeController {
     @RequestMapping("/getBadSharedEBike")
     public List<SharedEBike> getBadSharedEBike(){
         QueryWrapper<SharedEBike> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("state", "维修中");
+        queryWrapper.eq("state", state1);
         List<SharedEBike> list = sharedEBikeService.list(queryWrapper);
         return list;
     }
@@ -121,7 +141,7 @@ public class SharedEBikeController {
     public String updateSharedEBike(String sebId,String state){
         UpdateWrapper<SharedEBike> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("seb_id",Integer.parseInt(sebId));
-        if(!(state1.equals(state)|| state2.equals(state)|| state3.equals(state))){
+        if(!(state1.equals(state)|| state2.equals(state))){
             return "更新失败";
         }
         updateWrapper.set("state",state);

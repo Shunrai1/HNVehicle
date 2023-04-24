@@ -25,7 +25,7 @@ public class ShareBikeController {
     SharedBikeService sharedBikeService;
     final String state1="维修中";
     final String state2="正在使用中";
-    final String state3="停车中";
+
 
 
     /**
@@ -43,8 +43,25 @@ public class ShareBikeController {
                                 @RequestParam("monthlyUsageTimes")String monthlyUsageTimes,
                                 @RequestParam("lng")String lng, @RequestParam("lat")String lat) {
         SharedBike sharedBike = new SharedBike();
+        //判断no是否合法，”NH.000000” 到 ”HN.999999"之间的格式，并查询是否有重复车牌
+        QueryWrapper<SharedBike> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("no",no);
+        long count = sharedBikeService.count(queryWrapper);
+        int i;
+        try {
+            i = Integer.parseInt(no.substring(3));
+        } catch (NumberFormatException e) {
+            return "添加失败,no的格式错误";
+        }
+        if(!(no.length()==9&& no.startsWith("HN.")&&(i>=700000&&i<=799999))){
+            return "添加失败，no的格式错误";
+        }
+        if (count!=0){
+            return "添加失败，已经存在该车牌";
+        }
         sharedBike.setNo(no);
-        if(!(state1.equals(state)|| state2.equals(state)|| state3.equals(state))){
+        //添加的状态只能为这两种
+        if(!(state1.equals(state)|| state2.equals(state))){
             return "添加失败";
         }
         sharedBike.setState(state);
@@ -68,7 +85,7 @@ public class ShareBikeController {
     @RequestMapping("/getAllSharedBike")
     public List<SharedBike> getAllSharedBike(){
         QueryWrapper<SharedBike> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("state", "正在使用中").or().eq("state","停车中");
+        queryWrapper.eq("state", state2);
         List<SharedBike> list = sharedBikeService.list(queryWrapper);
         return list;
     }
@@ -81,7 +98,7 @@ public class ShareBikeController {
     @RequestMapping("/getBadSharedBike")
     public List<SharedBike> getBadSharedBike(){
         QueryWrapper<SharedBike> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("state", "维修中");
+        queryWrapper.eq("state", state1);
         List<SharedBike> list = sharedBikeService.list(queryWrapper);
         return list;
     }
@@ -113,7 +130,7 @@ public class ShareBikeController {
     public String updateSharedBike(String sbId,String state){
         UpdateWrapper<SharedBike> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("sb_id",Integer.parseInt(sbId));
-        if(!(state1.equals(state)|| state2.equals(state)|| state3.equals(state))){
+        if(!(state1.equals(state)|| state2.equals(state))){
             return "更新失败";
         }
         updateWrapper.set("state",state);
