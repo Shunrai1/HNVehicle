@@ -3,12 +3,15 @@ package com.example.hnvehicle.controller;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.example.hnvehicle.bean.ChargingPile;
 import com.example.hnvehicle.bean.SharedBike;
+import com.example.hnvehicle.bean.Stop;
 import com.example.hnvehicle.service.ChargingPileService;
+import com.example.hnvehicle.utils.RedisCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -21,23 +24,25 @@ import java.util.List;
 public class ChargingPileController {
     @Autowired
     ChargingPileService chargingPileService;
+    @Resource
+    RedisCache redisCache;
     final static String STATE1="可用";
     final static String STATE2="不可用";
     /**
      * 添加充电桩
-     * @param points 充电桩坐标集
+     * @param locality 充电桩坐标集
      * @return
      */
     @RequestMapping("/addChargingPile")
     @ResponseBody
-    public String addChargingPile(String points,String state){
+    public String addChargingPile(String locality/*,String state*/){
         ChargingPile chargingPile = new ChargingPile();
-        chargingPile.setLocality(points);
-        if(STATE1.equals(state)||STATE2.equals(state)){
-            chargingPile.setState(state);
-        }else {
-            return "添加失败";
-        }
+        chargingPile.setLocality(locality);
+//        if(STATE1.equals(state)||STATE2.equals(state)){
+//            chargingPile.setState(state);
+//        }else {
+//            return "添加失败";
+//        }
         boolean save = chargingPileService.save(chargingPile);
         if(save){
             return "添加成功";
@@ -70,7 +75,17 @@ public class ChargingPileController {
     @ResponseBody
     @RequestMapping("/getAllChargingPile")
     public List<ChargingPile> getAllChargingPile(){
-        return  chargingPileService.list();
+        List<ChargingPile> reList = redisCache.queryDataFromCache("getAllChargingPile", ChargingPile.class);
+        if(reList!=null){
+            return reList;
+        }else {
+            List<ChargingPile> list = chargingPileService.list();
+            //添加list到redis中
+            redisCache.cacheDataInRedis("getAllChargingPile",list);
+            return list;
+        }
+        //优化前
+//        return  chargingPileService.list();
     }
 
     /**

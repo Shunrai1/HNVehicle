@@ -1,7 +1,10 @@
 package com.example.hnvehicle.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.example.hnvehicle.bean.SharedEBike;
 import com.example.hnvehicle.bean.Stop;
 import com.example.hnvehicle.service.StopService;
+import com.example.hnvehicle.utils.RedisCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,17 +23,19 @@ import java.util.List;
 public class StopController {
     @Resource
     StopService stopService;
+    @Resource
+    RedisCache redisCache;
 
     /**
      * 添加停车点
-     * @param points 停车点坐标集
+     * @param locality 停车点坐标集
      * @return
      */
     @RequestMapping("/addStop")
     @ResponseBody
-    public String addStop(String points){
+    public String addStop(String locality){
         Stop stop = new Stop();
-        stop.setLocality(points);
+        stop.setLocality(locality);
         boolean save = stopService.save(stop);
         if(save){
             return "添加成功";
@@ -63,6 +68,16 @@ public class StopController {
     @ResponseBody
     @RequestMapping("/getAllStop")
     public List<Stop> getAllStop(){
-        return  stopService.list();
+        List<Stop> reList = redisCache.queryDataFromCache("getAllStop", Stop.class);
+        if(reList!=null){
+            return reList;
+        }else {
+            List<Stop> list = stopService.list();
+            //添加list到redis中
+            redisCache.cacheDataInRedis("getAllStop",list);
+            return list;
+        }
+        //优化前
+//        return  stopService.list();
     }
 }

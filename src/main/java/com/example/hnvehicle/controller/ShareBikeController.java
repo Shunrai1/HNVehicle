@@ -3,13 +3,16 @@ package com.example.hnvehicle.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.example.hnvehicle.bean.SharedBike;
+import com.example.hnvehicle.bean.SharedEBike;
 import com.example.hnvehicle.service.SharedBikeService;
+import com.example.hnvehicle.utils.RedisCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -23,6 +26,8 @@ public class ShareBikeController {
 
     @Autowired
     SharedBikeService sharedBikeService;
+    @Resource
+    RedisCache redisCache;
     final String state1="维修中";
     final String state2="正在使用中";
 
@@ -44,26 +49,26 @@ public class ShareBikeController {
                                 @RequestParam("lng")String lng, @RequestParam("lat")String lat) {
         SharedBike sharedBike = new SharedBike();
         //判断no是否合法，”NH.000000” 到 ”HN.999999"之间的格式，并查询是否有重复车牌
-        QueryWrapper<SharedBike> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("no",no);
-        long count = sharedBikeService.count(queryWrapper);
-        int i;
-        try {
-            i = Integer.parseInt(no.substring(3));
-        } catch (NumberFormatException e) {
-            return "添加失败,no的格式错误";
-        }
-        if(!(no.length()==9&& no.startsWith("HN.")&&(i>=700000&&i<=799999))){
-            return "添加失败，no的格式错误";
-        }
-        if (count!=0){
-            return "添加失败，已经存在该车牌";
-        }
+//        QueryWrapper<SharedBike> queryWrapper = new QueryWrapper<>();
+//        queryWrapper.eq("no",no);
+//        long count = sharedBikeService.count(queryWrapper);
+//        int i;
+//        try {
+//            i = Integer.parseInt(no.substring(3));
+//        } catch (NumberFormatException e) {
+//            return "添加失败,no的格式错误";
+//        }
+//        if(!(no.length()==9&& no.startsWith("HN.")&&(i>=700000&&i<=799999))){
+//            return "添加失败，no的格式错误";
+//        }
+//        if (count!=0){
+//            return "添加失败，已经存在该车牌";
+//        }
         sharedBike.setNo(no);
         //添加的状态只能为这两种
-        if(!(state1.equals(state)|| state2.equals(state))){
-            return "添加失败";
-        }
+//        if(!(state1.equals(state)|| state2.equals(state))){
+//            return "添加失败";
+//        }
         sharedBike.setState(state);
         sharedBike.setMonthlyUsageTimes(Integer.parseInt(monthlyUsageTimes));
         sharedBike.setLng(Double.parseDouble(lng));
@@ -84,10 +89,22 @@ public class ShareBikeController {
     @ResponseBody
     @RequestMapping("/getAllSharedBike")
     public List<SharedBike> getAllSharedBike(){
-        QueryWrapper<SharedBike> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("state", state2);
-        List<SharedBike> list = sharedBikeService.list(queryWrapper);
-        return list;
+        List<SharedBike> reList = redisCache.queryDataFromCache("getAllSharedBike", SharedBike.class);
+        if(reList!=null){
+            return reList;
+        }else {
+            QueryWrapper<SharedBike> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("state", state2);
+            List<SharedBike> list = sharedBikeService.list(queryWrapper);
+            //添加list到redis中
+            redisCache.cacheDataInRedis("getAllSharedBike",list);
+            return list;
+        }
+        //优化前
+//        QueryWrapper<SharedBike> queryWrapper = new QueryWrapper<>();
+//        queryWrapper.eq("state", state2);
+//        List<SharedBike> list = sharedBikeService.list(queryWrapper);
+//        return list;
     }
 
     /**
@@ -97,10 +114,22 @@ public class ShareBikeController {
     @ResponseBody
     @RequestMapping("/getBadSharedBike")
     public List<SharedBike> getBadSharedBike(){
-        QueryWrapper<SharedBike> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("state", state1);
-        List<SharedBike> list = sharedBikeService.list(queryWrapper);
-        return list;
+        List<SharedBike> reList = redisCache.queryDataFromCache("getBadSharedBike", SharedBike.class);
+        if(reList!=null){
+            return reList;
+        }else {
+            QueryWrapper<SharedBike> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("state", state1);
+            List<SharedBike> list = sharedBikeService.list(queryWrapper);
+            //添加list到redis中
+            redisCache.cacheDataInRedis("getBadSharedBike",list);
+            return list;
+        }
+        //优化前
+//        QueryWrapper<SharedBike> queryWrapper = new QueryWrapper<>();
+//        queryWrapper.eq("state", state1);
+//        List<SharedBike> list = sharedBikeService.list(queryWrapper);
+//        return list;
     }
 
     /**
@@ -140,5 +169,28 @@ public class ShareBikeController {
         }else {
             return "更新失败";
         }
+    }
+
+    @ResponseBody
+    @RequestMapping("/getSharedBikeNum")
+    public Long getSharedBikeNum(){
+        long count = sharedBikeService.count();
+        return count;
+    }
+
+    @ResponseBody
+    @RequestMapping("/getRepairSharedBikeNum")
+    public Long getRepairSharedBikeNum(){
+        QueryWrapper<SharedBike> sharedEBikeQueryWrapper = new QueryWrapper<>();
+        sharedEBikeQueryWrapper.eq("state",state1);
+        return sharedBikeService.count(sharedEBikeQueryWrapper);
+    }
+
+    @ResponseBody
+    @RequestMapping("/getUseSharedBikeNum")
+    public Long getUseSharedEBikeNum(){
+        QueryWrapper<SharedBike> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("state",state2);
+        return sharedBikeService.count(queryWrapper);
     }
 }

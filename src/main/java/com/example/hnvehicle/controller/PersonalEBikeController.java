@@ -4,12 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.hnvehicle.bean.PersonalEBike;
 import com.example.hnvehicle.bean.SharedBike;
 import com.example.hnvehicle.service.PersonalEBikeService;
+import com.example.hnvehicle.utils.RedisCache;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.annotation.Resource;
 import java.util.List;
 
 /**
@@ -22,7 +24,8 @@ import java.util.List;
 public class PersonalEBikeController {
     @Autowired
     PersonalEBikeService personalEBikeService;
-
+    @Resource
+    RedisCache redisCache;
 
 
     /**
@@ -41,21 +44,21 @@ public class PersonalEBikeController {
                                    @RequestParam("color")String color) {
         PersonalEBike personalEBike = new PersonalEBike();
         //判断no是否合法，”NH.000000” 到 ”HN.999999"之间的格式，并查询是否有重复车牌
-        QueryWrapper<PersonalEBike> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("no",no);
-        long count = personalEBikeService.count(queryWrapper);
-        int i;
-        try {
-             i = Integer.parseInt(no.substring(3));
-        } catch (NumberFormatException e) {
-            return "添加失败,no的格式错误";
-        }
-        if(!(no.length()==9&& no.startsWith("HN.")&&(i>=100000&&i<=599999))){
-            return "添加失败，no的格式错误";
-        }
-        if (count!=0){
-            return "添加失败，已经存在该车牌";
-        }
+//        QueryWrapper<PersonalEBike> queryWrapper = new QueryWrapper<>();
+//        queryWrapper.eq("no",no);
+//        long count = personalEBikeService.count(queryWrapper);
+//        int i;
+//        try {
+//             i = Integer.parseInt(no.substring(3));
+//        } catch (NumberFormatException e) {
+//            return "添加失败,no的格式错误";
+//        }
+//        if(!(no.length()==9&& no.startsWith("HN.")&&(i>=100000&&i<=599999))){
+//            return "添加失败，no的格式错误";
+//        }
+//        if (count!=0){
+//            return "添加失败，已经存在该车牌";
+//        }
         personalEBike.setNo(no);
         personalEBike.setOwnership(ownership);
         personalEBike.setTimeInterval(timeInterval);
@@ -78,6 +81,7 @@ public class PersonalEBikeController {
     @ResponseBody
     @RequestMapping("/getAllPersonalEBike")
     public List<PersonalEBike> getAllPersonalEBike(){
+
         List<PersonalEBike> list = personalEBikeService.list();
         return list;
     }
@@ -96,5 +100,20 @@ public class PersonalEBikeController {
         }else {
             return "删除失败";
         }
+    }
+
+
+    @ResponseBody
+    @RequestMapping("/getPersonalEBikeNum")
+    public Long getPersonalEBikeNum(){
+        return personalEBikeService.count();
+    }
+
+    @ResponseBody
+    @RequestMapping("/getPersonalEBikeNumByCampus")
+    public Long getPersonalEBikeNumByCampus(String campus){
+        QueryWrapper<PersonalEBike> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("campus",campus);
+        return personalEBikeService.count(queryWrapper);
     }
 }
