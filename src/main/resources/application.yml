@@ -2,7 +2,7 @@ server:
   port: 8000
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/HNVehicle
+    url: jdbc:postgresql://172.20.202.67:5432/HNVehicle
     username: postgres
     password: 2823124008
     driver-class-name: org.postgresql.Driver
