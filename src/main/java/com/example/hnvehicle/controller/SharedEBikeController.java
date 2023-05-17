@@ -170,9 +170,9 @@ public class SharedEBikeController {
     public String updateSharedEBike(String sebId,String state){
         UpdateWrapper<SharedEBike> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("seb_id",Integer.parseInt(sebId));
-        if(!(state1.equals(state)|| state2.equals(state))){
-            return "更新失败";
-        }
+//        if(!(state1.equals(state)|| state2.equals(state))){
+//            return "更新失败";
+//        }
         updateWrapper.set("state",state);
         boolean b = sharedEBikeService.update(null,updateWrapper);
         if(b){

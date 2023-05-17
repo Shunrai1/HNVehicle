@@ -30,15 +30,15 @@ public class ChargingPileController {
     final static String STATE2="不可用";
     /**
      * 添加充电桩
-     * @param locality 充电桩坐标集
+     * @param points 充电桩坐标集
      * @return
      */
     @RequestMapping("/addChargingPile")
     @ResponseBody
-    public String addChargingPile(String locality/*,String state*/){
+    public String addChargingPile(String points/*,String state*/){
         ChargingPile chargingPile = new ChargingPile();
-        chargingPile.setLocality(locality);
-//        if(STATE1.equals(state)||STATE2.equals(state)){
+        chargingPile.setLocality(points);
+//        if(STATE1.equals(state)||STATE2.equals(state)||"".equals(state)){
 //            chargingPile.setState(state);
 //        }else {
 //            return "添加失败";

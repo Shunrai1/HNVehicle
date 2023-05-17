@@ -113,7 +113,8 @@ public class PersonalEBikeController {
     @RequestMapping("/getPersonalEBikeNumByCampus")
     public Long getPersonalEBikeNumByCampus(String campus){
         QueryWrapper<PersonalEBike> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("campus",campus);
+//        queryWrapper.eq("campus",campus);
+        queryWrapper.like("campus",campus);
         return personalEBikeService.count(queryWrapper);
     }
 }

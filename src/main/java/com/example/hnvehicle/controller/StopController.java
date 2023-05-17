@@ -28,14 +28,14 @@ public class StopController {
 
     /**
      * 添加停车点
-     * @param locality 停车点坐标集
+     * @param points 停车点坐标集
      * @return
      */
     @RequestMapping("/addStop")
     @ResponseBody
-    public String addStop(String locality){
+    public String addStop(String points){
         Stop stop = new Stop();
-        stop.setLocality(locality);
+        stop.setLocality(points);
         boolean save = stopService.save(stop);
         if(save){
             return "添加成功";
